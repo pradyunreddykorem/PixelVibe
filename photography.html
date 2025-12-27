@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Your Name | Photography</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      background: #0f0f0f;
+      color: #fff;
+    }
+
+    header {
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    header h1 {
+      font-size: 2.5rem;
+    }
+
+    header p {
+      color: #aaa;
+      margin-top: 8px;
+    }
+     
+   .gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+  padding: 20px;
+  max-width: 1200px;
+  margin: auto;
+}
+
+.gallery img {
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.gallery img:hover {
+  transform: scale(1.03);
+}
+
+
+    /* 🔥 Full Screen Viewer */
+    .lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.95);
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+    }
+
+    .lightbox img {
+      max-width: 90%;
+      max-height: 85%;
+      border-radius: 12px;
+    }
+
+    .close {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      font-size: 30px;
+      cursor: pointer;
+    }
+
+    .nav {
+      position: absolute;
+      top: 50%;
+      font-size: 40px;
+      cursor: pointer;
+      user-select: none;
+      padding: 10px;
+    }
+
+    .prev {
+      left: 20px;
+    }
+
+    .next {
+      right: 20px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      color: #777;
+      font-size: 0.9rem;
+    }
+
+    a {
+      color: #fff;
+      text-decoration: none;
+    }
+
+    /* Smooth swipe animation */
+.lightbox img {
+  transition: transform 0.35s ease, opacity 0.35s ease;
+  touch-action: none;
+}
+.lightbox img {
+  max-width: 90%;
+  max-height: 85%;
+  border-radius: 12px;
+  touch-action: none;
+  transition: transform 0.3s ease;
+  cursor: grab;
+}
+
+.lightbox img:active {
+  cursor: grabbing;
+}
+
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>PixelVibe</h1>
+    <p>Photography • Visual Stories</p>
+  </header>
+
+  <section class="gallery">
+  <img src="C:\Users\korem\Downloads\IMG_0975.jpg" data-date="2025-12-27">
+  <img src="C:\Users\korem\Downloads\IMG_5901.jpeg" data-date="2025-12-20">
+  <img src="C:\Users\korem\Downloads\IMG_5898.jpeg" data-date="2025-12-15">
+  <img src="C:\Users\korem\Downloads\IMG_0962.jpg" data-date="2025-12-25">
+  <img src="C:\Users\korem\Downloads\20250622_065031(1) (1).jpg" data-date="2025-12-05">
+  <img src="C:\Users\korem\Downloads\20250419_071531.jpg" data-date="2025-12-01">
+
+</section>
+
+
+  <!-- Full Screen Viewer -->
+  <div class="lightbox" id="lightbox">
+    <span class="close" onclick="closeLightbox()">✕</span>
+    <span class="nav prev" onclick="changeImage(-1)">❯</span>
+    <img id="lightbox-img">
+    <span class="nav next" onclick="changeImage(1)">❯</span>
+  </div>
+
+  <footer>
+    © 2025 • PixelVibe •
+    <a href="https://instagram.com/korempradyunreddy" target="_blank">@korempradyunreddy</a>
+  </footer>
+
+<script>
+/* =============================
+   SORT: Latest → Top Left
+============================= */
+window.addEventListener("DOMContentLoaded", () => {
+  const gallery = document.querySelector(".gallery");
+  const imgs = Array.from(gallery.querySelectorAll("img"));
+
+  imgs
+    .sort((a, b) => new Date(b.dataset.date) - new Date(a.dataset.date))
+    .forEach(img => gallery.appendChild(img));
+
+  setupLightbox();
+});
+
+let images = [];
+let currentIndex = 0;
+
+/* =============================
+   LIGHTBOX SETUP
+============================= */
+function setupLightbox() {
+  images = Array.from(document.querySelectorAll(".gallery img"));
+  images.forEach((img, index) => {
+    img.addEventListener("click", () => {
+      currentIndex = index;
+      openLightbox();
+    });
+  });
+}
+
+const lightbox = document.getElementById("lightbox");
+const lightboxImg = document.getElementById("lightbox-img");
+
+function openLightbox() {
+  lightbox.style.display = "flex";
+  resetZoom();
+  lightboxImg.src = images[currentIndex].src;
+}
+
+function closeLightbox() {
+  lightbox.style.display = "none";
+}
+
+/* =============================
+   ZOOM + PAN
+============================= */
+let scale = 1, posX = 0, posY = 0;
+let startX = 0, startY = 0;
+let startDist = 0, lastTap = 0;
+
+function resetZoom() {
+  scale = 1;
+  posX = posY = 0;
+  applyTransform();
+}
+
+function applyTransform() {
+  lightboxImg.style.transform =
+    `translate(${posX}px, ${posY}px) scale(${scale})`;
+}
+
+/* Double-tap zoom */
+lightboxImg.addEventListener("touchend", e => {
+  const now = Date.now();
+  if (now - lastTap < 300) {
+    scale = scale === 1 ? 2 : 1;
+    posX = posY = 0;
+    applyTransform();
+  }
+  lastTap = now;
+});
+
+/* Pinch + drag */
+lightboxImg.addEventListener("touchstart", e => {
+  if (e.touches.length === 2) {
+    startDist = distance(e.touches[0], e.touches[1]);
+  } else {
+    startX = e.touches[0].clientX - posX;
+    startY = e.touches[0].clientY - posY;
+  }
+});
+
+lightboxImg.addEventListener("touchmove", e => {
+  if (e.touches.length === 2) {
+    scale = Math.min(Math.max(
+      distance(e.touches[0], e.touches[1]) / startDist, 1), 4);
+    applyTransform();
+  } else if (scale > 1) {
+    posX = e.touches[0].clientX - startX;
+    posY = e.touches[0].clientY - startY;
+    applyTransform();
+  }
+});
+
+/* Mouse wheel zoom */
+lightboxImg.addEventListener("wheel", e => {
+  e.preventDefault();
+  scale += e.deltaY * -0.001;
+  scale = Math.min(Math.max(1, scale), 4);
+  applyTransform();
+});
+
+/* =============================
+   SWIPE IMAGES
+============================= */
+lightboxImg.addEventListener("touchstart", e => {
+  if (scale === 1) startX = e.touches[0].clientX;
+});
+
+lightboxImg.addEventListener("touchend", e => {
+  if (scale !== 1) return;
+  const diff = e.changedTouches[0].clientX - startX;
+  if (diff > 120) changeImage(-1);
+  if (diff < -120) changeImage(1);
+});
+
+function changeImage(dir) {
+  currentIndex = (currentIndex + dir + images.length) % images.length;
+  resetZoom();
+  lightboxImg.src = images[currentIndex].src;
+}
+
+function distance(a, b) {
+  return Math.hypot(b.clientX - a.clientX, b.clientY - a.clientY);
+}
+
+/* Close on background click */
+lightbox.addEventListener("click", e => {
+  if (e.target === lightbox) closeLightbox();
+});
+</script>
+
+
+
+
+</body>
+</html>
